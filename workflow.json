@@ -1,0 +1,744 @@
+{
+  "name": "YT Analytics",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 2048
+        }
+      },
+      "id": "6584448c-c749-43fb-b2db-a03a0941e18a",
+      "name": "Groq Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        3088
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "RSAZ4b7RHjuQMAvf",
+          "name": "Groq API Vini"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "a3dfdbc0-5fcd-4e0e-ab0f-8ad40034db46",
+      "name": "Merge AI + Analytics1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -864,
+        2784
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.output;\n\nconst match = raw.match(/\\{[\\s\\S]*\\}/);\n\nconst ai = JSON.parse(match[0]);\n\nconst data = $json;\n\nconst fmt = (v) =>\n  Number(v || 0).toLocaleString('pt-BR');\n\nconst delta = (d) =>\n  d >= 0\n    ? `▲ ${d}%`\n    : `▼ ${Math.abs(d)}%`;\n\nconst deltaColor = (d) =>\n  d >= 0\n    ? '#22C55E'\n    : '#EF4444';\n\nconst formatNames = {\n  shorts: 'Shorts',\n  liveStream: 'Lives',\n  videoOnDemand: 'Vídeos',\n  creatorContentTypeUnspecified: 'Outros'\n};\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"pt-br\">\n\n<head>\n\n<meta charset=\"UTF-8\"/>\n\n<meta\nname=\"viewport\"\ncontent=\"width=device-width, initial-scale=1.0\"\n/>\n\n<link\nhref=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap\"\nrel=\"stylesheet\"\n/>\n\n<style>\n\n*{\nmargin:0;\npadding:0;\nbox-sizing:border-box;\n}\n\n:root{\n\n--bg:#F8F9FB;\n--card:#FFFFFF;\n--border:#ECECEC;\n\n--text:#111827;\n--muted:#6B7280;\n\n--primary:#FF3366;\n\n--success:#22C55E;\n--danger:#EF4444;\n\n}\n\nhtml,\nbody{\n\nwidth:100%;\nheight:100%;\n\noverflow:hidden;\n\nbackground:var(--bg);\n\n}\n\nbody{\n\nfont-family:'Inter',sans-serif;\n\ncolor:var(--text);\n\n}\n\n#root{\n\nwidth:1920px;\nheight:1080px;\n\noverflow:hidden;\n\nbackground:var(--bg);\n\ntransform-origin:top left;\n\ndisplay:flex;\nflex-direction:column;\n\npadding:20px 24px;\n\ngap:12px;\n\n}\n\n/* HEADER */\n\n.header{\n\ndisplay:flex;\njustify-content:space-between;\nalign-items:center;\n\nflex-shrink:0;\n\n}\n\n.logo{\n\nfont-size:26px;\nfont-weight:800;\n\nletter-spacing:-1px;\n\n}\n\n.logo span{\ncolor:var(--primary);\n}\n\n.period{\n\nbackground:#fff;\n\nborder:1px solid var(--border);\n\nborder-radius:999px;\n\npadding:8px 16px;\n\nfont-size:13px;\nfont-weight:600;\n\ncolor:var(--muted);\n\n}\n\n/* CARD */\n\n.card{\n\nbackground:#fff;\n\nborder:1px solid var(--border);\n\nborder-radius:20px;\n\nbox-shadow:\n0 1px 3px rgba(16,24,40,.06);\n\n}\n\n/* HERO */\n\n.hero{\n\ndisplay:grid;\n\ngrid-template-columns:\nrepeat(6,1fr);\n\ngap:12px;\n\nflex-shrink:0;\n\n}\n\n.kpi{\n\npadding:14px 16px;\n\ndisplay:flex;\nflex-direction:column;\n\ngap:6px;\n\n}\n\n.kpi-top{\n\ndisplay:flex;\nalign-items:center;\n\ngap:10px;\n\n}\n\n.kpi-icon{\n\nwidth:40px;\nheight:40px;\n\nborder-radius:12px;\n\ndisplay:flex;\nalign-items:center;\njustify-content:center;\n\nflex-shrink:0;\n\n}\n\n.kpi-icon svg{\n\nwidth:20px;\nheight:20px;\n\nstroke-width:2.2;\n\nstroke:var(--text);\n\nfill:none;\n\n}\n\n.kpi-title{\n\nfont-size:12px;\nfont-weight:600;\n\ncolor:var(--muted);\n\n}\n\n.kpi-value{\n\nfont-size:38px;\nfont-weight:800;\n\nletter-spacing:-1.5px;\n\nline-height:1;\n\n}\n\n.kpi-delta{\n\nfont-size:16px;\nfont-weight:700;\n\nmargin-top:auto;\n\n}\n\n.queda{\n\npadding:14px 16px;\n\ndisplay:flex;\nflex-direction:column;\njustify-content:center;\n\ngap:6px;\n\n}\n\n.queda-title{\n\nfont-size:18px;\nfont-weight:800;\n\ndisplay:flex;\nalign-items:center;\n\ngap:8px;\n\n}\n\n.queda-title svg{\n\nwidth:18px;\nheight:18px;\n\nstroke:var(--danger);\n\nfill:none;\n\nstroke-width:2.2;\n\n}\n\n.queda-item{\n\ndisplay:flex;\njustify-content:space-between;\n\nfont-size:14px;\n\n}\n\n/* SECTION */\n\n.section-card{\n\npadding:14px 16px;\n\nflex-shrink:0;\n\n}\n\n.section-title{\n\nfont-size:22px;\nfont-weight:800;\n\nletter-spacing:-0.5px;\n\nmargin-bottom:10px;\n\n}\n\n/* FORMATOS */\n\n.format-grid{\n\ndisplay:grid;\n\ngrid-template-columns:\nrepeat(4,1fr);\n\ngap:12px;\n\n}\n\n.format-card{\n\npadding:14px 16px;\n\n}\n\n.format-top{\n\ndisplay:flex;\nalign-items:center;\n\ngap:10px;\n\nmargin-bottom:10px;\n\n}\n\n.format-icon{\n\nwidth:38px;\nheight:38px;\n\nborder-radius:12px;\n\nbackground:#F4F4F5;\n\ndisplay:flex;\nalign-items:center;\njustify-content:center;\n\nflex-shrink:0;\n\n}\n\n.format-icon svg{\n\nwidth:20px;\nheight:20px;\n\nstroke:var(--primary);\n\nfill:none;\n\nstroke-width:2.2;\n\n}\n\n.format-name{\n\nfont-size:20px;\nfont-weight:800;\n\nletter-spacing:-0.5px;\n\n}\n\n.format-metrics{\n\ndisplay:grid;\n\ngrid-template-columns:1fr 1fr;\n\ngap:8px;\n\n}\n\n.metric-label{\n\nfont-size:12px;\n\ncolor:var(--muted);\n\nmargin-bottom:2px;\n\n}\n\n.metric-value{\n\nfont-size:16px;\nfont-weight:700;\n\n}\n\n.metric-footer{\n\nmargin-top:10px;\n\ndisplay:flex;\n\ngap:14px;\n\nfont-size:13px;\n\n}\n\n/* VIDEOS */\n\n.video-grid{\n\ndisplay:grid;\n\ngrid-template-columns:\nrepeat(5,1fr);\n\ngap:12px;\n\n}\n\n.video{\n\nbackground:#fff;\n\nborder:1px solid var(--border);\n\nborder-radius:16px;\n\noverflow:hidden;\n\nposition:relative;\n\nbox-shadow:\n0 1px 3px rgba(16,24,40,.06);\n\ntransition:.2s ease;\n\n}\n\n.video:hover{\n\ntransform:translateY(-2px);\n\nbox-shadow:\n0 8px 20px rgba(0,0,0,.06);\n\n}\n\n.video img{\n\nwidth:100%;\nheight:150px;\n\nobject-fit:cover;\n\ndisplay:block;\n\n}\n\n.rank{\n\nposition:absolute;\n\ntop:10px;\nleft:10px;\n\nbackground:var(--text);\n\ncolor:#fff;\n\nwidth:32px;\nheight:32px;\n\nborder-radius:10px;\n\ndisplay:flex;\nalign-items:center;\njustify-content:center;\n\nfont-weight:800;\nfont-size:15px;\n\nborder:2px solid rgba(255,255,255,.2);\n\n}\n\n.video-body{\n\npadding:10px 12px;\n\n}\n\n.video-title{\n\nfont-size:16px;\nfont-weight:700;\n\nline-height:1.2;\n\nmargin-bottom:6px;\n\ndisplay:-webkit-box;\n\n-webkit-line-clamp:2;\n-webkit-box-orient:vertical;\n\noverflow:hidden;\n\nmin-height:38px;\n\nletter-spacing:-0.3px;\n\n}\n\n.video-views{\n\ndisplay:flex;\nalign-items:baseline;\n\ngap:5px;\n\nmargin-bottom:8px;\n\n}\n\n.views-big{\n\nfont-size:30px;\nfont-weight:800;\n\nletter-spacing:-1px;\n\ncolor:var(--primary);\n\n}\n\n.views-label{\n\nfont-size:13px;\n\ncolor:var(--muted);\n\n}\n\n.video-metrics{\n\ndisplay:flex;\n\ngap:16px;\n\nmargin-bottom:8px;\n\n}\n\n.video-metric-label{\n\nfont-size:11px;\n\ncolor:var(--muted);\n\nmargin-bottom:2px;\n\n}\n\n.video-metric-value{\n\nfont-size:14px;\nfont-weight:700;\n\n}\n\n.bar{\n\nwidth:100%;\nheight:4px;\n\nbackground:var(--border);\n\nborder-radius:999px;\n\noverflow:hidden;\n\n}\n\n.bar-fill{\n\nheight:100%;\n\nbackground:var(--primary);\n\nborder-radius:999px;\n\n}\n\n/* FOOTER */\n\n.footer{\n\ndisplay:grid;\n\ngrid-template-columns:1fr 1fr;\n\ngap:12px;\n\nflex-shrink:0;\n\n}\n\n.footer-box{\n\npadding:14px 16px;\n\n}\n\n.footer-title{\n\nfont-size:17px;\nfont-weight:800;\n\nmargin-bottom:8px;\n\n}\n\n.footer-text{\n\nfont-size:14px;\n\nline-height:1.5;\n\ncolor:#374151;\n\n}\n\nul{\npadding-left:16px;\n}\n\nli{\n\nmargin-bottom:5px;\n\nfont-size:14px;\n\nline-height:1.4;\n\ncolor:#374151;\n\n}\n\n</style>\n\n</head>\n\n<body>\n\n<div id=\"root\">\n\n<!-- HEADER -->\n\n<div class=\"header\">\n\n<div class=\"logo\">\nTVCASA <span>Analytics</span>\n</div>\n\n<div class=\"period\">\n${data.periodo.inicio} → ${data.periodo.fim}\n</div>\n\n</div>\n\n<!-- HERO -->\n\n<div class=\"hero\">\n\n${Object.entries(data.grandes_numeros).map(([k,v]) => {\n\nconst icons = {\n\nviews: `\n<svg viewBox=\"0 0 24 24\">\n<path d=\"M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z\"/>\n<circle cx=\"12\" cy=\"12\" r=\"3\"/>\n</svg>\n`,\n\nlikes: `\n<svg viewBox=\"0 0 24 24\">\n<path d=\"M12 21s-6.7-4.35-9.33-8A5.33 5.33 0 0 1 12 6a5.33 5.33 0 0 1 9.33 7c-2.63 3.65-9.33 8-9.33 8Z\"/>\n</svg>\n`,\n\ncomentarios: `\n<svg viewBox=\"0 0 24 24\">\n<path d=\"M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z\"/>\n</svg>\n`,\n\ninscritos: `\n<svg viewBox=\"0 0 24 24\">\n<path d=\"M20 21a8 8 0 1 0-16 0\"/>\n<circle cx=\"12\" cy=\"7\" r=\"4\"/>\n</svg>\n`,\n\ntempo_assistido: `\n<svg viewBox=\"0 0 24 24\">\n<circle cx=\"12\" cy=\"12\" r=\"9\"/>\n<path d=\"M12 7v5l3 3\"/>\n</svg>\n`\n};\n\nconst colors = {\nviews:'#EEF4FF',\nlikes:'#FFF1F2',\ncomentarios:'#ECFDF3',\ninscritos:'#F5F3FF',\ntempo_assistido:'#FFF7ED'\n};\n\nreturn `\n\n<div class=\"card kpi\">\n\n<div class=\"kpi-top\">\n\n<div\nclass=\"kpi-icon\"\nstyle=\"background:${colors[k]}\"\n>\n\n${icons[k]}\n\n</div>\n\n<div class=\"kpi-title\">\n${k.replace('_',' ').toUpperCase()}\n</div>\n\n</div>\n\n<div class=\"kpi-value\">\n${fmt(v.valor)}\n</div>\n\n<div\nclass=\"kpi-delta\"\nstyle=\"color:${deltaColor(v.delta)}\"\n>\n${delta(v.delta)}\n</div>\n\n</div>\n\n`;\n\n}).join('')}\n\n<div class=\"card queda\">\n\n<div class=\"queda-title\">\n\n<svg viewBox=\"0 0 24 24\">\n<path d=\"M3 3v18h18\"/>\n<path d=\"m19 9-5 5-4-4-5 5\"/>\n</svg>\n\n<span>Queda</span>\n\n</div>\n\n<div class=\"queda-item\">\n\n<span>Views</span>\n\n<span style=\"\ncolor:#EF4444;\nfont-weight:700;\n\">\n\n${delta(data.grandes_numeros.views.delta)}\n\n</span>\n\n</div>\n\n<div class=\"queda-item\">\n\n<span>Likes</span>\n\n<span style=\"\ncolor:#EF4444;\nfont-weight:700;\n\">\n\n${delta(data.grandes_numeros.likes.delta)}\n\n</span>\n\n</div>\n\n</div>\n\n</div>\n\n<!-- FORMATOS -->\n\n<div class=\"card section-card\">\n\n<div class=\"section-title\">\nFormatos\n</div>\n\n<div class=\"format-grid\">\n\n${data.formatos.map(f => {\n\nconst icons = {\n\nShorts: `\n<svg viewBox=\"0 0 24 24\">\n<path d=\"M8 7c0-2 8-2 8-4 0-1.5-2-3-4-3S8 1.5 8 3\"/>\n<path d=\"M16 17c0 2-8 2-8 4 0 1.5 2 3 4 3s4-1.5 4-3\"/>\n<path d=\"M8 7c0 2 8 2 8 4s-8 2-8 4\"/>\n</svg>\n`,\n\nLives: `\n<svg viewBox=\"0 0 24 24\">\n<circle cx=\"12\" cy=\"12\" r=\"2\"/>\n<path d=\"M16.24 7.76a6 6 0 0 1 0 8.48\"/>\n<path d=\"M7.76 16.24a6 6 0 0 1 0-8.48\"/>\n<path d=\"M19.07 4.93a10 10 0 0 1 0 14.14\"/>\n<path d=\"M4.93 19.07a10 10 0 0 1 0-14.14\"/>\n</svg>\n`,\n\nVídeos: `\n<svg viewBox=\"0 0 24 24\">\n<path d=\"M8 5v14l11-7Z\"/>\n</svg>\n`,\n\nOutros: `\n<svg viewBox=\"0 0 24 24\">\n<circle cx=\"5\" cy=\"12\" r=\"1.5\"/>\n<circle cx=\"12\" cy=\"12\" r=\"1.5\"/>\n<circle cx=\"19\" cy=\"12\" r=\"1.5\"/>\n</svg>\n`\n};\n\nconst alias =\nformatNames[f.tipo] || f.tipo;\n\nreturn `\n\n<div class=\"card format-card\">\n\n<div class=\"format-top\">\n\n<div class=\"format-icon\">\n${icons[alias]}\n</div>\n\n<div class=\"format-name\">\n${alias}\n</div>\n\n</div>\n\n<div class=\"format-metrics\">\n\n<div>\n\n<div class=\"metric-label\">\nViews\n</div>\n\n<div class=\"metric-value\">\n${fmt(f.views)}\n</div>\n\n</div>\n\n<div>\n\n<div class=\"metric-label\">\nRetenção\n</div>\n\n<div class=\"metric-value\">\n${f.retencao}%\n</div>\n\n</div>\n\n</div>\n\n<div class=\"metric-footer\">\n\n<div>\nInscritos:\n<b>${f.inscritos}</b>\n</div>\n\n<div>\nEficiência:\n<b>${f.eficiencia}</b>\n</div>\n\n</div>\n\n</div>\n\n`;\n\n}).join('')}\n\n</div>\n\n</div>\n\n<!-- TOP VIDEOS -->\n\n<div\nclass=\"card section-card\"\nstyle=\"\nflex:1;\nmin-height:0;\n\"\n>\n\n<div class=\"section-title\">\nTop Conteúdos\n</div>\n\n<div class=\"video-grid\">\n\n${data.top_videos.map((v,index) => `\n\n<div class=\"video\">\n\n<div class=\"rank\">\n${index + 1}\n</div>\n\n<img\nsrc=\"${v.thumb}\"\nloading=\"lazy\"\n/>\n\n<div class=\"video-body\">\n\n<div class=\"video-title\">\n${v.titulo}\n</div>\n\n<div class=\"video-views\">\n\n<div class=\"views-big\">\n${fmt(v.views)}\n</div>\n\n<div class=\"views-label\">\nviews\n</div>\n\n</div>\n\n<div class=\"video-metrics\">\n\n<div>\n\n<div class=\"video-metric-label\">\nretenção\n</div>\n\n<div class=\"video-metric-value\">\n${v.retencao}%\n</div>\n\n</div>\n\n<div>\n\n<div class=\"video-metric-label\">\nengajamento\n</div>\n\n<div class=\"video-metric-value\">\n${v.engajamento}%\n</div>\n\n</div>\n\n</div>\n\n<div class=\"bar\">\n\n<div\nclass=\"bar-fill\"\nstyle=\"\nwidth:${Math.min(v.retencao,100)}%\n\"\n></div>\n\n</div>\n\n</div>\n\n</div>\n\n`).join('')}\n\n</div>\n\n</div>\n\n<!-- FOOTER -->\n\n<div class=\"footer\">\n\n<div class=\"card footer-box\">\n\n<div class=\"footer-title\">\nDiagnóstico\n</div>\n\n<div class=\"footer-text\">\n${ai.diagnostico_formato}\n</div>\n\n</div>\n\n<div class=\"card footer-box\">\n\n<div class=\"footer-title\">\nPróximas ações\n</div>\n\n<ul>\n\n${ai.acoes_proxima_semana\n.map(a => `<li>${a}</li>`)\n.join('')}\n\n</ul>\n\n</div>\n\n</div>\n\n</div>\n\n<script>\n\n(function(){\n\nconst root =\ndocument.getElementById('root');\n\nfunction scale(){\n\nconst scaleX =\nwindow.innerWidth / 1920;\n\nconst scaleY =\nwindow.innerHeight / 1080;\n\nconst factor =\nMath.min(scaleX,scaleY);\n\nroot.style.transform =\n'scale(' + factor + ')';\n\ndocument.body.style.width =\nMath.round(1920 * factor) + 'px';\n\ndocument.body.style.height =\nMath.round(1080 * factor) + 'px';\n\n}\n\nwindow.addEventListener(\n'resize',\nscale\n);\n\nscale();\n\n})();\n\n</script>\n\n</body>\n</html>\n`;\n\nconst buffer =\nBuffer.from(html, 'utf8');\n\nreturn {\n\njson: {\nfileName: 'report.html',\n},\n\nbinary: {\n\ndata:\nawait this.helpers.prepareBinaryData(\nbuffer,\n'report.html',\n'text/html'\n),\n\n},\n\n};"
+      },
+      "id": "3c5dde2b-9a45-402c-a469-f5a1c342c521",
+      "name": "HTML Builder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        2784
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 7,
+              "triggerAtHour": 7,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "41fb9d22-6f8c-492f-b8e2-233764a7dd31",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -2848,
+        2816
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://youtubeanalytics.googleapis.com/v2/reports",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "channel==MINE"
+            },
+            {
+              "name": "metrics",
+              "value": "views,likes,comments,estimatedMinutesWatched,averageViewPercentage,subscribersGained"
+            },
+            {
+              "name": "dimensions",
+              "value": "creatorContentType"
+            },
+            {
+              "name": "sort",
+              "value": "-views"
+            },
+            {
+              "name": "startDate",
+              "value": "={{ $today.minus(7, 'days').toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f4807a6b-77a1-41dd-bb0d-0129091d4785",
+      "name": "Analytics Formato Atual",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2528,
+        2544
+      ],
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "ht8nq0tbdZYiGPCq",
+          "name": "Cap_Canal_YT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://youtubeanalytics.googleapis.com/v2/reports",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "channel==MINE"
+            },
+            {
+              "name": "metrics",
+              "value": "views,likes,comments,estimatedMinutesWatched,averageViewPercentage,subscribersGained"
+            },
+            {
+              "name": "dimensions",
+              "value": "video"
+            },
+            {
+              "name": "sort",
+              "value": "-views"
+            },
+            {
+              "name": "maxResults",
+              "value": "25"
+            },
+            {
+              "name": "startDate",
+              "value": "={{ $today.minus(7, 'days').toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $today.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f8d9178b-44c8-4aec-88de-6c6ef99f4b39",
+      "name": "Analytics Vídeo Atual",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2528,
+        2912
+      ],
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "ht8nq0tbdZYiGPCq",
+          "name": "Cap_Canal_YT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://youtubeanalytics.googleapis.com/v2/reports",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "channel==MINE"
+            },
+            {
+              "name": "metrics",
+              "value": "views,likes,comments,estimatedMinutesWatched,averageViewPercentage,subscribersGained"
+            },
+            {
+              "name": "dimensions",
+              "value": "creatorContentType"
+            },
+            {
+              "name": "sort",
+              "value": "-views"
+            },
+            {
+              "name": "startDate",
+              "value": "={{ $today.minus(14, 'days').toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $today.minus(7, 'days').toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fca26535-0e76-4500-a3f3-af271bbeee67",
+      "name": "Analytics Formato Anterior",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2528,
+        2720
+      ],
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "ht8nq0tbdZYiGPCq",
+          "name": "Cap_Canal_YT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://youtubeanalytics.googleapis.com/v2/reports",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "channel==MINE"
+            },
+            {
+              "name": "metrics",
+              "value": "views,likes,comments,estimatedMinutesWatched,averageViewPercentage,subscribersGained"
+            },
+            {
+              "name": "dimensions",
+              "value": "video"
+            },
+            {
+              "name": "sort",
+              "value": "-views"
+            },
+            {
+              "name": "maxResults",
+              "value": "25"
+            },
+            {
+              "name": "startDate",
+              "value": "={{ $today.minus(14, 'days').toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $today.minus(7, 'days').toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7e77770a-6189-43be-a0c5-2824273cd259",
+      "name": "Analytics Vídeo Anterior",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2528,
+        3104
+      ],
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "ht8nq0tbdZYiGPCq",
+          "name": "Cap_Canal_YT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst formatoAtual = items[0].json;\nconst formatoAnterior = items[1].json;\nconst videosAtual = items[2].json;\nconst videosAnterior = items[3].json;\n\nfunction mapRows(data) {\n\n  const headers = data.columnHeaders.map(h => h.name);\n\n  return data.rows.map(row => {\n\n    const obj = {};\n\n    headers.forEach((h, i) => {\n      obj[h] = row[i];\n    });\n\n    return obj;\n  });\n}\n\nconst formatosAtual = mapRows(formatoAtual);\nconst formatosAnterior = mapRows(formatoAnterior);\n\nconst videosA = mapRows(videosAtual);\nconst videosB = mapRows(videosAnterior);\n\nfunction calcDelta(a, b) {\n\n  if (!b || b === 0) return 0;\n\n  return Number((((a - b) / b) * 100).toFixed(1));\n}\n\nfunction sumMetric(rows, key) {\n\n  return rows.reduce((acc, r) => {\n\n    return acc + Number(r[key] || 0);\n\n  }, 0);\n}\n\nconst totalAtual = {\n  views: sumMetric(videosA, 'views'),\n  likes: sumMetric(videosA, 'likes'),\n  comments: sumMetric(videosA, 'comments'),\n  inscritos: sumMetric(videosA, 'subscribersGained'),\n  watch: sumMetric(videosA, 'estimatedMinutesWatched'),\n};\n\nconst totalAnterior = {\n  views: sumMetric(videosB, 'views'),\n  likes: sumMetric(videosB, 'likes'),\n  comments: sumMetric(videosB, 'comments'),\n  inscritos: sumMetric(videosB, 'subscribersGained'),\n  watch: sumMetric(videosB, 'estimatedMinutesWatched'),\n};\n\nconst grandes_numeros = {\n\n  views: {\n    valor: totalAtual.views,\n    delta: calcDelta(totalAtual.views, totalAnterior.views)\n  },\n\n  likes: {\n    valor: totalAtual.likes,\n    delta: calcDelta(totalAtual.likes, totalAnterior.likes)\n  },\n\n  comentarios: {\n    valor: totalAtual.comments,\n    delta: calcDelta(totalAtual.comments, totalAnterior.comments)\n  },\n\n  inscritos: {\n    valor: totalAtual.inscritos,\n    delta: calcDelta(totalAtual.inscritos, totalAnterior.inscritos)\n  },\n\n  tempo_assistido: {\n    valor: (totalAtual.watch / 60).toFixed(1),\n    delta: calcDelta(totalAtual.watch, totalAnterior.watch)\n  }\n};\n\nconst formatos = formatosAtual.map(f => {\n\n  const eficiencia =\n    (\n      (f.averageViewPercentage * 1.5) +\n      (f.subscribersGained * 10) +\n      ((f.likes / Math.max(f.views,1)) * 100)\n    ).toFixed(0);\n\n  return {\n\n    tipo: f.creatorContentType,\n\n    views: f.views,\n\n    likes: f.likes,\n\n    comentarios: f.comments,\n\n    inscritos: f.subscribersGained,\n\n    retencao: Number(f.averageViewPercentage).toFixed(1),\n\n    watchTime: (f.estimatedMinutesWatched / 60).toFixed(1),\n\n    eficiencia\n  };\n});\n\nconst top_videos = videosA\n  .map(v => {\n\n    const score =\n      Math.round(\n        (v.views * 0.3) +\n        (v.likes * 2) +\n        (v.comments * 4) +\n        (v.subscribersGained * 8) +\n        (v.averageViewPercentage * 1.5)\n      );\n\n    return {\n\n      id: v.video,\n\n      thumb: `https://i.ytimg.com/vi/${v.video}/mqdefault.jpg`,\n\n      titulo: v.title || v.video,\n\n      views: v.views,\n\n      likes: v.likes,\n\n      comentarios: v.comments,\n\n      inscritos: v.subscribersGained,\n\n      retencao: Number(v.averageViewPercentage).toFixed(1),\n\n      watchTime: (v.estimatedMinutesWatched / 60).toFixed(1),\n\n      engajamento:\n        (\n          ((v.likes + v.comments) / Math.max(v.views,1)) * 100\n        ).toFixed(1),\n\n      score\n    };\n  })\n  .sort((a,b) => b.score - a.score)\n  .slice(0,5);\n\nreturn [\n  {\n    json: {\n\n      periodo: {\n\n        inicio:\n          $today.minus(7, 'days').toFormat('dd/MM'),\n\n        fim:\n          $today.toFormat('dd/MM')\n      },\n\n      grandes_numeros,\n\n      formatos,\n\n      top_videos\n    }\n  }\n];"
+      },
+      "id": "2cd16537-a464-40ff-874b-e572734f7fff",
+      "name": "Analytics Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1424,
+        2768
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1872,
+        2672
+      ],
+      "id": "67b2f54e-a81e-45cc-97f5-ce6706ec77cd",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1856,
+        2896
+      ],
+      "id": "3edb610a-b15f-47f7-9553-15cc6edb592f",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1632,
+        2768
+      ],
+      "id": "17015140-7f16-45df-ad8a-d58be3a77c79",
+      "name": "Merge Final"
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/videos",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "id",
+              "value": "={{ $('Analytics Vídeo Atual').first().json.rows.map(r => r[0]).join(',') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "36c05615-5989-4a4c-8da6-0aadbb173a99",
+      "name": "Analytics Vídeo Atual1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2304,
+        2896
+      ],
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "ht8nq0tbdZYiGPCq",
+          "name": "Cap_Canal_YT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const analytics = $('Analytics Vídeo Atual').first().json;\nconst youtube = $json;\n\nconst titleMap = {};\n\nyoutube.items.forEach(v => {\n  titleMap[v.id] = v.snippet.title;\n});\n\nanalytics.rows = analytics.rows.map(r => {\n  r.push(titleMap[r[0]] || r[0]);\n  return r;\n});\n\nanalytics.columnHeaders.push({\n  name: 'title',\n  columnType: 'DIMENSION',\n  dataType: 'STRING'\n});\n\nreturn [\n  {\n    json: analytics\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2080,
+        2896
+      ],
+      "id": "e2fc4bb2-f325-486f-9de7-7e2ab89de83c",
+      "name": "Map Vídeos Titles"
+    },
+    {
+      "parameters": {
+        "outputFormat": "pdf",
+        "additionalOptions": "{\n  \"orientation\": \"landscape\",\n  \"page_size\": \"a4\",\n  \"print_background\": true,\n  \"scale\": 0.85,\n  \"wait_until\": \"networkidle0\",\n  \"delay\": 1500,\n  \"timeout\": 60\n}"
+      },
+      "id": "a91426e1-8cb8-41fb-b3c4-c886c7559703",
+      "name": "Convert PDF",
+      "type": "@cloudconvert/n8n-nodes-cloudconvert.cloudConvert",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        2704
+      ],
+      "credentials": {
+        "cloudConvertOAuth2Api": {
+          "id": "XrGAlUX6PBWd3ZED",
+          "name": "CloudConvert account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "outputFormat": "png",
+        "additionalOptions": "{\n  \"page_width\": 1920,\n  \"page_height\": 1080,\n  \"zoom\": 1,\n  \"fit\": \"max\",\n  \"print_background\": true\n}"
+      },
+      "id": "67828997-889a-4b5d-bf6c-fc192689c4b0",
+      "name": "Convert PNG",
+      "type": "@cloudconvert/n8n-nodes-cloudconvert.cloudConvert",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        2912
+      ],
+      "credentials": {
+        "cloudConvertOAuth2Api": {
+          "id": "XrGAlUX6PBWd3ZED",
+          "name": "CloudConvert account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const myBuffer = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst base64 = myBuffer.toString('base64');\nreturn [\n  { json: { number: '5561985254499', image: base64, caption: 'Relatório Semanal YouTube' } },\n  { json: { number: '5561985839517', image: base64, caption: 'Relatório Semanal YouTube' } }\n];"
+      },
+      "id": "edde9baf-a685-49ec-9e68-a4ad11a37254",
+      "name": "Prepare WhatsApp",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        2912
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "donarute",
+        "remoteJid": "={{ $json.number }}",
+        "media": "={{ $json.image }}",
+        "caption": "={{ $json.caption }}",
+        "options_message": {}
+      },
+      "id": "2d1fd68f-a63a-4e33-93eb-125a4069815b",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        2912
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "qvAbGd0ua2FKGW53",
+          "name": "donarute"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "bsbvinidesousa@gmail.com",
+        "subject": "Relatório Semanal YouTube",
+        "emailType": "text",
+        "message": "Segue relatório semanal do canal \"Casa de Adoração Prófetica\"!.",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "id": "af41434a-f4f3-4dfe-9c66-c542efde3973",
+      "name": "Enviar Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        2704
+      ],
+      "webhookId": "ef310cbf-c47d-40fe-a686-51d5a440779a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GKNKRtVN9Ue1FIUG",
+          "name": "vinisandrade"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é o Head de Growth e Inteligência de Conteúdo da CAP.\n\nAnalise os dados semanalmente comparando:\n- semana atual\n- semana anterior\n\nSeu trabalho:\n- detectar crescimento\n- identificar queda\n- explicar comportamento da audiência\n- gerar insights acionáveis\n\nDADOS:\n{{ JSON.stringify($json) }}\n\nREGRAS:\n- Não invente números\n- Não elogie sem dados\n- Linguagem executiva\n- Frases curtas\n- Foque em retenção, crescimento e formatos\n\nRETORNE APENAS JSON:\n\n{\n  \"status_impacto\": \"\",\n  \"analise_kpis\": \"\",\n  \"diagnostico_formato\": \"\",\n  \"acoes_proxima_semana\": [\n    \"\",\n    \"\",\n    \"\"\n  ],\n  \"destaques_vitorias\": [\n    {\n      \"titulo\": \"\",\n      \"motivo\": \"\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "dce7e55e-4708-494c-889e-ed9e6e277594",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1216,
+        2880
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge AI + Analytics1": {
+      "main": [
+        [
+          {
+            "node": "HTML Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Builder": {
+      "main": [
+        [
+          {
+            "node": "Convert PDF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convert PNG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Analytics Formato Atual",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Analytics Formato Anterior",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Analytics Vídeo Atual",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Analytics Vídeo Anterior",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analytics Formato Atual": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analytics Vídeo Atual": {
+      "main": [
+        [
+          {
+            "node": "Analytics Vídeo Atual1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analytics Formato Anterior": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Analytics Vídeo Anterior": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Analytics Engine": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge AI + Analytics1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Merge Final",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Final": {
+      "main": [
+        [
+          {
+            "node": "Analytics Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analytics Vídeo Atual1": {
+      "main": [
+        [
+          {
+            "node": "Map Vídeos Titles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Vídeos Titles": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert PDF": {
+      "main": [
+        [
+          {
+            "node": "Enviar Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert PNG": {
+      "main": [
+        [
+          {
+            "node": "Prepare WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge AI + Analytics1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "17c2ef32-95e0-4a79-b9ad-eaaae3a95703",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8cd28aa69d59956b064be68401bd9d1e22892f7d8930e02e69763f621c9c67a6"
+  },
+  "id": "tQ7riebO4UysZMda",
+  "tags": []
+}
