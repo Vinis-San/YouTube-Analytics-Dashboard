@@ -64,7 +64,7 @@ A inteligência artificial analisa os dados crus e atua estrategicamente para:
 ### 🖼 Dashboard Premium e Distribuição
 O sistema gera um dashboard HTML responsivo (estilo SaaS Analytics), que é convertido em PDF executivo e PNG, distribuindo os arquivos de forma 100% automatizada para grupos/contatos no WhatsApp e caixas de entrada no Gmail.
 
-![Workflow completo no n8n](./assets/workflow.png)
+![Workflow completo no n8n](./Assets/workflow.png)
 
 ---
 
@@ -83,6 +83,12 @@ O sistema gera um dashboard HTML responsivo (estilo SaaS Analytics), que é conv
 6. **Distribuição:** O relatório é disparado pelos nós do Gmail e da Evolution API (WhatsApp).
 
 ---
+
+## Imagem Dashboard
+
+![Dashboard Gerado](./Assets/dashboard.png)
+
+--
 
 ## ⚡ Diferenciais
 
