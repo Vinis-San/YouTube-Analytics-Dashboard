@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Analytics Intelligence System | Case Study</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff1f2',
+                            500: '#ff3366', // Rosa/Vermelho estilo YouTube/Moderno
+                            600: '#e11d48',
+                            900: '#881337',
+                        }
+                    },
+                    animation: {
+                        'flow': 'flow 2s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        flow: {
+                            '0%': { strokeDashoffset: '20' },
+                            '100%': { strokeDashoffset: '0' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #fafafa;
+            color: #111827;
+        }
+
+        /* Glassmorphism utilities */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Gradient text */
+        .text-gradient {
+            background: linear-gradient(135deg, #ff3366, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Subtle grid background */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+        }
+
+        /* n8n Node Styles */
+        .n8n-node {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            width: 220px;
+            position: relative;
+            z-index: 10;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .n8n-node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            border-color: #d1d5db;
+        }
+        .n8n-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        /* Scroll reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Hero Section -->
+    <section class="relative pt-20 pb-20 lg:pt-28 lg:pb-28 overflow-hidden bg-grid">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Text Content -->
+                <div class="reveal">
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="px-3 py-1 bg-white border border-gray-200 text-xs font-semibold text-gray-600 rounded-full flex items-center gap-1 shadow-sm">
+                            <i class="ph-fill ph-database text-brand-500"></i> Pipeline de Dados
+                        </span>
+                        <span class="px-3 py-1 bg-white border border-gray-200 text-xs font-semibold text-gray-600 rounded-full flex items-center gap-1 shadow-sm">
+                            <i class="ph-fill ph-code text-purple-500"></i> Automação n8n
+                        </span>
+                    </div>
+                    
+                    <h1 class="text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6">
+                        Construindo pipelines e <br>
+                        <span class="text-gradient">relatórios automatizados.</span>
+                    </h1>
+                    
+                    <p class="text-lg text-gray-600 mb-8 max-w-lg leading-relaxed">
+                        Um case de estudo demonstrando a extração de dados da API do YouTube, cálculo de KPIs, enriquecimento das análises usando Inteligência Artificial e a geração visual dinâmica de reportes.
+                    </p>
+                    
+                    <div class="flex items-center gap-4">
+                        <a href="#workflow" class="bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition shadow-lg shadow-black/10 flex items-center gap-2">
+                            Ver Arquitetura <i class="ph ph-arrow-right"></i>
+                        </a>
+                        <a href="https://github.com/Vinis-San/YouTube-Analytics-Dashboard" target="_blank" class="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition flex items-center gap-2">
+                            <i class="ph ph-code"></i> GitHub
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Dashboard Preview Hero -->
+                <div class="relative reveal animate-float">
+                    <div class="absolute -inset-1 bg-gradient-to-tr from-brand-500 to-orange-400 rounded-2xl blur-2xl opacity-20"></div>
+                    
+                    <div class="relative rounded-xl border border-gray-200 shadow-2xl bg-white w-full overflow-hidden">
+                        <img src="Assets/dashboard.png" alt="Dashboard Preview" class="w-full h-auto object-cover">
+                    </div>
+                    
+                    <!-- Floating Badge -->
+                    <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl">
+                            <i class="ph-fill ph-whatsapp-logo"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900">Relatório Entregue</p>
+                            <p class="text-xs text-gray-500">Toda segunda, 08:00 AM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Visão para Negócios (Business Value) -->
+    <section id="visao-geral" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl font-bold mb-4 tracking-tight">O Fluxo de Dados <span class="text-brand-500">(Pipeline)</span></h2>
+                <p class="text-gray-600">O projeto foi estruturado para resolver o ciclo completo do dado: da extração bruta na API até a visualização final formatada para consumo em dispositivos móveis.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="glass-card p-8 rounded-2xl reveal">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6">
+                        <i class="ph-fill ph-database"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Extração e Transformação (ETL)</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        O workflow conecta-se à API do YouTube via OAuth2, extrai as métricas brutas e utiliza nós de JavaScript (ES6) para calcular deltas, retenção e engajamento comparando com períodos anteriores.
+                    </p>
+                </div>
+                <!-- Card 2 -->
+                <div class="glass-card p-8 rounded-2xl reveal delay-100">
+                    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-2xl mb-6">
+                        <i class="ph-fill ph-brain"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Enriquecimento Analítico</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Os KPIs estruturados são enviados em formato JSON para um modelo fundacional (Llama 3.3 via Groq API), que atua como um agente de dados para gerar diagnósticos e sumarizar anomalias ou tendências.
+                    </p>
+                </div>
+                <!-- Card 3 -->
+                <div class="glass-card p-8 rounded-2xl reveal delay-200">
+                    <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-2xl mb-6">
+                        <i class="ph-fill ph-file-html"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Renderização e Distribuição</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Os dados processados injetam variáveis em um template HTML/CSS no backend. Esse HTML é convertido em PDF/PNG (via CloudConvert) e roteado para o WhatsApp (Evolution API) e Gmail.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- O Dashboard -->
+    <section id="dashboard" class="py-20 bg-gray-50 border-y border-gray-200">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                
+                <div class="order-2 lg:order-1 reveal">
+                    <div class="rounded-xl shadow-xl border border-gray-200 overflow-hidden w-full bg-white">
+                        <img src="Assets/dashboard.png" alt="Relatório TVCASA Analytics" class="w-full h-auto object-cover">
+                    </div>
+                </div>
+
+                <div class="order-1 lg:order-2 reveal">
+                    <h2 class="text-3xl font-bold mb-4">Visualização de Dados<br>Gerada via Código.</h2>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        Em vez de utilizar ferramentas tradicionais de BI (como Power BI ou Metabase) onde o usuário precisa acessar um link, o desafio foi gerar o front-end programaticamente no backend.
+                    </p>
+                    <ul class="space-y-4 text-gray-700">
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-brand-500 mt-1"></i>
+                            <div>
+                                <strong class="block">Design Responsivo no Backend</strong>
+                                <span class="text-sm text-gray-500">Uso de Flexbox e CSS Grid nativos dentro do script para montar um grid visual perfeito.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-brand-500 mt-1"></i>
+                            <div>
+                                <strong class="block">Lógica de Cores Dinâmicas</strong>
+                                <span class="text-sm text-gray-500">Métricas positivas ficam verdes (▲), métricas negativas ficam vermelhas (▼) injetadas via código.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-check-circle text-brand-500 mt-1"></i>
+                            <div>
+                                <strong class="block">Conversão Lossless</strong>
+                                <span class="text-sm text-gray-500">O layout gerado no DOM virtual é "fotografado" em alta resolução sem perda de qualidade.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mapeamento Processual (BPMN Modernizado) -->
+    <section id="workflow" class="py-24 bg-white overflow-hidden relative">
+        <!-- Fundo sutil -->
+        <div class="absolute inset-0 bg-grid opacity-50 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl font-bold mb-4">Mapeamento de Processos <span class="text-brand-500">(BPMN)</span></h2>
+                <p class="text-gray-600 mb-4">
+                    A arquitetura foi desenhada de forma <strong>agnóstica a ferramentas</strong>. O fluxo lógico abaixo mapeia o ciclo de vida do dado neste projeto.
+                </p>
+                
+                <!-- Print do Workflow Real -->
+                <div class="my-10 rounded-xl shadow-xl border border-gray-200 overflow-hidden bg-white">
+                    <img src="Assets/Workflow.png" alt="Print do Fluxo Workflow" class="w-full h-auto object-cover">
+                </div>
+
+                <p class="text-sm text-gray-500 bg-gray-50 p-4 rounded-lg border border-gray-200 inline-block">
+                    <i class="ph-fill ph-info text-blue-500 mr-1"></i>
+                    <strong>Nota de Infraestrutura:</strong> Neste case utilizamos o <strong>n8n</strong> pois a instituição já possuía uma VPS rodando outras automações (otimização de custos). O mesmo pipeline de engenharia de dados poderia ser orquestrado puramente com scripts <strong>Python</strong>, <strong>Power Automate</strong> ou <strong>Apache Airflow</strong>.
+                </p>
+            </div>
+
+            <!-- UI do Fluxo (Vertical no Mobile, Horizontal no Desktop) -->
+            <div class="relative reveal">
+                <!-- Linha conectora (Desktop) -->
+                <div class="hidden lg:block absolute top-1/2 left-10 right-10 h-1 bg-gray-200 -translate-y-1/2 z-0 rounded-full">
+                    <div class="h-full bg-brand-500 w-full opacity-30 animate-pulse rounded-full"></div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row justify-between items-center lg:items-stretch gap-6 relative z-10">
+                    
+                    <!-- Passo 1: Extração -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full lg:w-1/5 flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300 group">
+                        <div class="w-14 h-14 bg-red-50 text-red-600 rounded-full flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                            <i class="ph-fill ph-youtube-logo"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">1. Extração</h3>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Fonte de Dados</p>
+                        <p class="text-sm text-gray-600">Requisições agendadas via OAuth2 para consumir métricas brutas da API do YouTube.</p>
+                    </div>
+
+                    <!-- Ícone conector (Mobile) -->
+                    <div class="block lg:hidden text-gray-300">
+                        <i class="ph-fill ph-arrow-down text-2xl"></i>
+                    </div>
+
+                    <!-- Passo 2: ETL -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full lg:w-1/5 flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300 group">
+                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                            <i class="ph-fill ph-funnel"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">2. Transformação</h3>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">ETL & Regras</p>
+                        <p class="text-sm text-gray-600">Limpeza do JSON, união de tabelas, cálculo numérico de deltas e sumarização de engajamento.</p>
+                    </div>
+
+                    <!-- Ícone conector (Mobile) -->
+                    <div class="block lg:hidden text-gray-300">
+                        <i class="ph-fill ph-arrow-down text-2xl"></i>
+                    </div>
+
+                    <!-- Passo 3: IA -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full lg:w-1/5 flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300 group">
+                        <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                            <i class="ph-fill ph-brain"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">3. Enriquecimento</h3>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Análise LLM</p>
+                        <p class="text-sm text-gray-600">Injeção dos KPIs em um agente IA (Llama 3.3) para gerar diagnósticos executivos qualitativos.</p>
+                    </div>
+
+                    <!-- Ícone conector (Mobile) -->
+                    <div class="block lg:hidden text-gray-300">
+                        <i class="ph-fill ph-arrow-down text-2xl"></i>
+                    </div>
+
+                    <!-- Passo 4: Renderização -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full lg:w-1/5 flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300 group">
+                        <div class="w-14 h-14 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                            <i class="ph-fill ph-image"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">4. Renderização</h3>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Visualização</p>
+                        <p class="text-sm text-gray-600">Construção do Dashboard em HTML via código e conversão programática para imagem e PDF.</p>
+                    </div>
+
+                    <!-- Ícone conector (Mobile) -->
+                    <div class="block lg:hidden text-gray-300">
+                        <i class="ph-fill ph-arrow-down text-2xl"></i>
+                    </div>
+
+                    <!-- Passo 5: Distribuição -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full lg:w-1/5 flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300 group">
+                        <div class="w-14 h-14 bg-green-50 text-green-600 rounded-full flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                            <i class="ph-fill ph-paper-plane-tilt"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">5. Distribuição</h3>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">Entrega</p>
+                        <p class="text-sm text-gray-600">Disparo automatizado dos arquivos via APIs de mensageria (WhatsApp) e E-mail Institucional.</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Outros Casos de Uso (Versatilidade) -->
+    <section id="casos-de-uso" class="py-20 bg-gray-50 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+                <span class="text-brand-500 font-semibold tracking-wider text-sm uppercase">Versatilidade Analítica</span>
+                <h2 class="text-3xl font-bold mt-2 mb-4">Aplicações deste mesmo conceito</h2>
+                <p class="text-gray-600">O mapeamento lógico de extrair, tratar e distribuir dados é o core da engenharia de dados, aplicável a diversos cenários utilizando diferentes stacks tecnológicas.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Caso 1 -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition reveal">
+                    <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center text-xl mb-4">
+                        <i class="ph-fill ph-file-text"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Montagem de Contratos Dinâmicos</h3>
+                    <p class="text-gray-600 text-sm mb-3">
+                        Ideal para processos seletivos ou imobiliárias. Um <em>webhook</em> recebe inputs de um formulário e um script preenche dinamicamente as cláusulas em um template PDF baseado em regras de negócio.
+                    </p>
+                    <div class="flex gap-2 mt-auto">
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Power Automate</span>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Python</span>
+                    </div>
+                </div>
+                
+                <!-- Caso 2 -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition reveal delay-100">
+                    <div class="w-10 h-10 bg-red-50 text-red-600 rounded-lg flex items-center justify-center text-xl mb-4">
+                        <i class="ph-fill ph-warning-circle"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Alertas e Data Quality (ETL)</h3>
+                    <p class="text-gray-600 text-sm mb-3">
+                        Monitoramento contínuo da saúde dos dados. Scripts executam <em>queries</em> no banco SQL e, se detectarem divergências ou quebra de lote, disparam um resumo de erros via Slack ou Teams para a equipe.
+                    </p>
+                    <div class="flex gap-2 mt-auto">
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">SQL</span>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Airflow</span>
+                    </div>
+                </div>
+
+                <!-- Caso 3 -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition reveal delay-200">
+                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xl mb-4">
+                        <i class="ph-fill ph-chart-line-up"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Automação de Fechamentos</h3>
+                    <p class="text-gray-600 text-sm mb-3">
+                        Consolidação de dados do ERP com o CRM. Uma automação extrai, realiza a modelagem dimensional em Pandas/Polars, renderiza um report executivo e envia para o comitê gerencial no WhatsApp.
+                    </p>
+                    <div class="flex gap-2 mt-auto">
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Pandas</span>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">n8n</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-6 text-center reveal">
+            <p class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-8">Stack Tecnológica & APIs Utilizadas</p>
+            <div class="flex flex-wrap justify-center gap-8 items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+                <span class="flex items-center gap-2 font-bold text-xl"><i class="ph-fill ph-robot"></i> n8n</span>
+                <span class="flex items-center gap-2 font-bold text-xl"><i class="ph-fill ph-brain"></i> Groq AI</span>
+                <span class="flex items-center gap-2 font-bold text-xl"><i class="ph-fill ph-youtube-logo"></i> YouTube API</span>
+                <span class="flex items-center gap-2 font-bold text-xl"><i class="ph-fill ph-file-code"></i> HTML/CSS</span>
+                <span class="flex items-center gap-2 font-bold text-xl"><i class="ph-fill ph-whatsapp-logo"></i> Evolution API</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-8 items-center">
+            <div>
+                <h3 class="text-2xl font-bold mb-2">Vinícius Andrade</h3>
+                <p class="text-gray-400 text-sm max-w-md">
+                    Analista de Dados focado em criar pipelines eficientes, integrar APIs e transformar dados brutos em insights e automações práticas.
+                </p>
+            </div>
+            <div class="flex md:justify-end gap-4">
+                <a href="mailto:bsbvinidesousa@gmail.com" class="p-3 bg-gray-800 rounded-full hover:bg-brand-500 transition tooltip" title="Email">
+                    <i class="ph ph-envelope-simple text-xl"></i>
+                </a>
+                <a href="https://github.com/vinis-san" target="_blank" class="p-3 bg-gray-800 rounded-full hover:bg-gray-700 transition tooltip" title="GitHub">
+                    <i class="ph ph-github-logo text-xl"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/vin%C3%ADcius-andrade-912295234/" target="_blank" class="p-3 bg-gray-800 rounded-full hover:bg-blue-600 transition tooltip" title="LinkedIn">
+                    <i class="ph ph-linkedin-logo text-xl"></i>
+                </a>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 mt-12 text-center text-gray-500 text-xs">
+            &copy; 2024 Vinícius Andrade. Analytics Automation Showcase.
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Scroll Reveal Animation
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal(); // Call on load
+
+    </script>
+</body>
+</html>
